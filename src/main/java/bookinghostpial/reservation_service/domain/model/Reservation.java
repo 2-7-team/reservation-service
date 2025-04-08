@@ -35,6 +35,7 @@ public class Reservation extends BaseEntity {
 	private ReservationStatus status;
 
 	@Builder(builderMethodName = "createReservationBuilder")
+	
 	public Reservation(UUID reservationSlotId, Long userId, ReservationStatus status) {
 		this.reservationSlotId = reservationSlotId;
 		this.userId = userId;

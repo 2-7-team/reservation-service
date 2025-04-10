@@ -17,4 +17,22 @@ public class ReservationExceptionHandler extends GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
+
+	@ExceptionHandler(NotExistReservationException.class)
+	protected ResponseEntity<String> handleException(NotExistReservationException e) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	}
+
+	@ExceptionHandler(ReservationAlreadyDeletedException.class)
+	protected ResponseEntity<String> handleException(ReservationAlreadyDeletedException e) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	}
+
+	@ExceptionHandler(ReservationPermissionDenied.class)
+	protected ResponseEntity<String> handleException(ReservationPermissionDenied e) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	}
 }

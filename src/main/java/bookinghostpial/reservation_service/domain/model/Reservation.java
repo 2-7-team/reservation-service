@@ -1,5 +1,6 @@
 package bookinghostpial.reservation_service.domain.model;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import bookinghospital.common_module.BaseEntity;
@@ -33,15 +34,27 @@ public class Reservation extends BaseEntity {
 	private Long userId;
 
 	@Column(nullable = false)
+	private LocalDate reservationDate;
+
+	@Column(nullable = false)
+	private Integer reservationTime;
+
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ReservationStatus status;
 
 	@Builder(builderMethodName = "createReservationBuilder")
-
-	public Reservation(UUID reservationSlotId, Long userId, ReservationStatus status) {
+	private Reservation(UUID reservationSlotId, Long userId, ReservationStatus status, LocalDate reservationDate,
+		Integer reservationTime) {
 		this.reservationSlotId = reservationSlotId;
 		this.userId = userId;
 		this.status = status;
+		this.reservationDate = reservationDate;
+		this.reservationTime = reservationTime;
 	}
 
+	public void update(LocalDate reservationDate, Integer reservationTime) {
+		this.reservationDate = reservationDate;
+		this.reservationTime = reservationTime;
+	}
 }

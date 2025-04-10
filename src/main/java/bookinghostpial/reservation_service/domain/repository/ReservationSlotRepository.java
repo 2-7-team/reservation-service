@@ -7,7 +7,6 @@ import java.util.UUID;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
 
 public interface ReservationSlotRepository {
-	ReservationSlot findById(Long id);
 
 	ReservationSlot save(ReservationSlot reservationSlot);
 

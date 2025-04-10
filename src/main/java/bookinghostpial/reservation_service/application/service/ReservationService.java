@@ -3,16 +3,22 @@ package bookinghostpial.reservation_service.application.service;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import bookinghostpial.reservation_service.application.client.ReservationClient;
-import bookinghostpial.reservation_service.application.dto.request.CreateReservationDto;
+import bookinghostpial.reservation_service.domain.exception.NotExistReservationException;
+import bookinghostpial.reservation_service.domain.exception.ReservationAlreadyDeletedException;
 import bookinghostpial.reservation_service.domain.model.Reservation;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
 import bookinghostpial.reservation_service.domain.model.ReservationStatus;
 import bookinghostpial.reservation_service.domain.repository.ReservationRepository;
 import bookinghostpial.reservation_service.domain.repository.ReservationSlotRepository;
+import bookinghostpial.reservation_service.presentation.dto.response.ReservationDetailsResponse;
+import bookinghostpial.reservation_service.presentation.dto.response.ReservationResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,29 +30,71 @@ public class ReservationService {
 	private final ReservationSlotRepository reservationSlotRepository;
 	private final ReservationClient reservationClient;
 	private static long USER_ID = 1L;
-	//private static UUID uuid = UUID.randomUUID();
 
 	@Transactional
-	public void createReservation(CreateReservationDto hospitalId) {
-
+	public void createReservation(UUID hospitalId, LocalDate reservationDate, Integer reservationTime) {
 
 		/*
 		 * RESERVATION SLOT 존재하는지 확인 후 반환.
 		 * */
-		ReservationSlot reservationSlot = checkReservationSlot(hospitalId.getHospitalId(),    //추후 도메인 이벤트 방식으로 변경 고려
-			hospitalId.getReservationDate(),
-			hospitalId.getReservationTime());
+		ReservationSlot reservationSlot = checkReservationSlot(hospitalId,    //추후 도메인 이벤트 방식으로 변경 고려
+			reservationDate,
+			reservationTime);
 
 		reservationSlot.decrease();                    //동시성 처리 필요
 
 		Reservation reservation = Reservation.createReservationBuilder()
-			.userId(USER_ID)
+			.userId(USER_ID++)    //임시
 			.reservationSlotId(reservationSlot.getId())
+			.reservationDate(reservationDate)
+			.reservationTime(reservationTime)
 			.status(ReservationStatus.SCHEDULED)
 			.build();
 
-		USER_ID++;
 		reservationRepository.save(reservation);
+	}
+
+	public Page<ReservationResponse> getReservationList(
+		//UserInfo userInfo
+		@PageableDefault Pageable pageable
+	) {
+		Page<Reservation> allByUserId = reservationRepository.findAllByUserId(pageable);
+
+		return allByUserId.map(
+			reservation -> ReservationResponse.builder()
+				.reservation(reservation).build());
+	}
+
+	public ReservationDetailsResponse getReservationDetails(UUID reservationId) {
+
+		Reservation reservation = findReservation(reservationId);
+		isDeleted(reservation);
+		return ReservationDetailsResponse
+			.builder()
+			.reservation(reservation)
+			.build();
+	}
+
+	@Transactional
+	public void updateReservation(UUID reservationId, LocalDate reservationDate, Integer reservationTime) {
+		Reservation reservation = findReservation(reservationId);
+
+/*		유저 정보 권한 검증
+		if (!userInfo.getRole.equals("ADMIN") && reservation.getUserId() != userInfo) {
+			throw new ReservationPermissionDenied("접근 권한이 없습니다");
+		}*/
+		reservation.update(reservationDate, reservationTime);
+	}
+
+	@Transactional
+	public void deleteReservation(UUID reservationId) {
+		Reservation reservation = findReservation(reservationId);
+
+		/*
+			if (!userInfo.getRole.equals("ADMIN") && reservation.getUserId() != userInfo) {
+			throw new ReservationPermissionDenied("접근 권한이 없습니다");
+		 */
+		reservation.delete(1L);    //임시
 	}
 
 	private ReservationSlot checkReservationSlot(UUID hospitalId, LocalDate reservationDate, Integer reservationTime) {
@@ -68,8 +116,14 @@ public class ReservationService {
 		return reservationSlot;
 	}
 
-	public void getReservationList(
-		//UserInfo userInfo
-	) {
+	private Reservation findReservation(UUID reservationId) {
+		return reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new NotExistReservationException("존재하지 않는 예약입니다"));
+	}
+
+	private void isDeleted(Reservation reservation) {
+		if (reservation.isDeleted()) {
+			throw new ReservationAlreadyDeletedException("이미 삭제된 예약입니다.");
+		}
 	}
 }

@@ -18,12 +18,6 @@ public class ReservationSlotRepositoryImpl implements ReservationSlotRepository 
 	private final ReservationSlotJpaRepository reservationSlotJpaRepository;
 
 	@Override
-	public ReservationSlot findById(Long id) {
-		return reservationSlotJpaRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("reservation slot not found"));
-	}
-
-	@Override
 	public ReservationSlot save(ReservationSlot reservationSlot) {
 		return reservationSlotJpaRepository.save(reservationSlot);
 	}

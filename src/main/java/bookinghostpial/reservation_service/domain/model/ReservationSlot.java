@@ -1,0 +1,55 @@
+package bookinghostpial.reservation_service.domain.model;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import bookinghostpial.reservation_service.domain.exception.NoLeftSeatException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "reservation_Slot")
+public class ReservationSlot {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
+
+	@Column(nullable = false)
+	private UUID hospitalId;
+
+	@Column(nullable = false)
+	private Integer left_seat;
+
+	@Column(nullable = false)
+	private LocalDate reservationDate;
+
+	@Column(nullable = false)
+	private Integer reservationTime;
+
+	@Builder(builderMethodName = "createReservationSlotBuilder")
+	public ReservationSlot(UUID hospitalId, Integer leftSeat, LocalDate reservationDate, Integer reservationTime) {
+		this.hospitalId = hospitalId;
+		this.left_seat = leftSeat;
+		this.reservationDate = reservationDate;
+		this.reservationTime = reservationTime;
+	}
+
+	public void decrease() {
+		if (left_seat > 0) {
+			left_seat--;
+		} else {
+			throw new NoLeftSeatException("예약 가능한 좌석이 없습니다.");
+		}
+	}
+}

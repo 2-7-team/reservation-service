@@ -2,6 +2,7 @@ package bookinghostpial.reservation_service.domain.model;
 
 import java.util.UUID;
 
+import bookinghospital.common_module.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,13 +11,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_reservation")
 public class Reservation extends BaseEntity {
 
@@ -35,7 +37,7 @@ public class Reservation extends BaseEntity {
 	private ReservationStatus status;
 
 	@Builder(builderMethodName = "createReservationBuilder")
-	
+
 	public Reservation(UUID reservationSlotId, Long userId, ReservationStatus status) {
 		this.reservationSlotId = reservationSlotId;
 		this.userId = userId;

@@ -34,8 +34,10 @@ public class ReservationController {
 	}
 
 	@GetMapping()
-	public ResponseEntity<ReservationListResponse> getAllReservations() {
-
+	public ResponseEntity<ReservationListResponse> getAllReservations(
+		//@UserInfo userInfo
+	) {
+		reservationService.getReservationList();
 		return null;
 	}
 

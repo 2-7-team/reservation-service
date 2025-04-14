@@ -53,7 +53,8 @@ public class Reservation extends BaseEntity {
 		this.reservationTime = reservationTime;
 	}
 
-	public void update(LocalDate reservationDate, Integer reservationTime) {
+	public void update(LocalDate reservationDate, Integer reservationTime, UUID reservationSlotId) {
+		this.reservationSlotId = reservationSlotId;
 		this.reservationDate = reservationDate;
 		this.reservationTime = reservationTime;
 	}

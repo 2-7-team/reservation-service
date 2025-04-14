@@ -12,4 +12,6 @@ public interface ReservationSlotRepository {
 
 	Optional<ReservationSlot> findByReservationInfo(UUID hospitalId, LocalDate reservationDate,
 		Integer reservationTime);
+
+	Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId);
 }

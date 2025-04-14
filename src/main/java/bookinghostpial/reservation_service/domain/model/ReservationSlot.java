@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +19,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reservation_Slot")
+@Table(name = "reservation_Slot"
+	, uniqueConstraints = {
+	@UniqueConstraint(
+		name = "constraintsName",
+		columnNames = {"hospitalId", "reservationDate", "reservationTime"}
+	)
+}
+
+)
 public class ReservationSlot {
 
 	@Id
@@ -51,5 +60,9 @@ public class ReservationSlot {
 		} else {
 			throw new NoLeftSeatException("예약 가능한 좌석이 없습니다.");
 		}
+	}
+
+	public void increase() {
+		left_seat++;
 	}
 }

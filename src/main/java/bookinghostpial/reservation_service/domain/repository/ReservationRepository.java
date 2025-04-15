@@ -11,7 +11,7 @@ import bookinghostpial.reservation_service.domain.model.Reservation;
 public interface ReservationRepository {
 	Reservation save(Reservation reservation);
 
-	Page<Reservation> findAllByUserId(Pageable pageable);
+	Page<Reservation> findAllByUserId(Pageable pageable, Long userId);
 
 	Optional<Reservation> findById(UUID reservationId);
 }

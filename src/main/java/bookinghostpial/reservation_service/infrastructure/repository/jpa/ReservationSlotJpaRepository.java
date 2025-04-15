@@ -17,5 +17,5 @@ public interface ReservationSlotJpaRepository extends JpaRepository<ReservationS
 		LocalDate reservationDate, Integer reservationTime);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId);
+	Optional<ReservationSlot> findById(UUID reservationSlotId);
 }

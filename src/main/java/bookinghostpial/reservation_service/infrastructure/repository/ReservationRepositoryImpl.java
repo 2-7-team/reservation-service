@@ -26,8 +26,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 	}
 
 	@Override
-	public Page<Reservation> findAllByUserId(Pageable pageable) {
-		return reservationQueryDslRepository.findAllByUserId(1L, pageable); //임시
+	public Page<Reservation> findAllByUserId(Pageable pageable, Long userId) {
+		return reservationQueryDslRepository.findAllByUserId(userId, pageable); //임시
 	}
 
 	@Override

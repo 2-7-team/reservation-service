@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import bookinghospital.common_module.userInfo.UserDetails;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
 import bookinghostpial.reservation_service.domain.repository.ReservationRepository;
 import bookinghostpial.reservation_service.domain.repository.ReservationSlotRepository;
@@ -41,7 +42,8 @@ class ReservationServiceTest {
 		for (int i = 0; i < count; i++) {
 			executorService.execute(() -> {
 				try {
-					reservationService.createReservation(hospitalId, LocalDate.now(), 10);
+					reservationService.createReservation(hospitalId, LocalDate.now(), 10,
+						new UserDetails("1L", "ROLE_USER"));
 				} finally {
 					latch.countDown();
 				}

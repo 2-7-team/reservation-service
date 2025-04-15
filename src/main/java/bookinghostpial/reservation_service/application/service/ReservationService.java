@@ -6,13 +6,14 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import bookinghospital.common_module.userInfo.UserDetails;
 import bookinghostpial.reservation_service.application.client.ReservationClient;
 import bookinghostpial.reservation_service.domain.exception.NotExistReservationException;
 import bookinghostpial.reservation_service.domain.exception.ReservationAlreadyDeletedException;
+import bookinghostpial.reservation_service.domain.exception.ReservationPermissionDenied;
 import bookinghostpial.reservation_service.domain.model.Reservation;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
 import bookinghostpial.reservation_service.domain.model.ReservationStatus;
@@ -30,10 +31,10 @@ public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final ReservationSlotRepository reservationSlotRepository;
 	private final ReservationClient reservationClient;
-	private static long USER_ID = 1L;
 
 	@Transactional
-	public void createReservation(UUID hospitalId, LocalDate reservationDate, Integer reservationTime) {
+	public void createReservation(UUID hospitalId, LocalDate reservationDate, Integer reservationTime,
+		UserDetails userInfo) {
 
 		/*
 		 * RESERVATION SLOT 존재하는지 확인 후 반환.
@@ -42,10 +43,10 @@ public class ReservationService {
 			reservationDate,
 			reservationTime);
 
-		reservationSlot.decrease();                    //동시성 처리 필요
+		reservationSlot.decrease();
 
 		Reservation reservation = Reservation.createReservationBuilder()
-			.userId(USER_ID)    //임시
+			.userId(userInfo.getUserId())
 			.reservationSlotId(reservationSlot.getId())
 			.reservationDate(reservationDate)
 			.reservationTime(reservationTime)
@@ -56,10 +57,14 @@ public class ReservationService {
 	}
 
 	public Page<ReservationResponse> getReservationList(
-		//UserInfo userInfo
-		@PageableDefault Pageable pageable
+		Pageable pageable,
+		UserDetails userInfo
 	) {
-		Page<Reservation> allByUserId = reservationRepository.findAllByUserId(pageable);
+		Long userId = null;
+		if (userInfo.getRole().equals("ROLE_USER")) {
+			userId = userInfo.getUserId();
+		}
+		Page<Reservation> allByUserId = reservationRepository.findAllByUserId(pageable, userId);
 
 		return allByUserId.map(
 			reservation -> ReservationResponse.builder()
@@ -77,14 +82,13 @@ public class ReservationService {
 	}
 
 	@Transactional
-	public void updateReservation(UUID reservationId, LocalDate reservationDate, Integer reservationTime) {
+	public void updateReservation(UUID reservationId, LocalDate reservationDate, Integer reservationTime,
+		UserDetails userInfo) {
 		Reservation reservation = findReservation(reservationId);
 
 		ReservationSlot slot = findSlotForUpdate(reservation.getReservationSlotId());
-/*		유저 정보 권한 검증
-		if (!userInfo.getRole.equals("ADMIN") && reservation.getUserId() != userInfo) {
-			throw new ReservationPermissionDenied("접근 권한이 없습니다");
-		}*/
+
+		checkAuthority(userInfo, reservation);
 
 		slot.increase();
 
@@ -98,17 +102,14 @@ public class ReservationService {
 	}
 
 	@Transactional
-	public void deleteReservation(UUID reservationId) {
+	public void deleteReservation(UUID reservationId, UserDetails userInfo) {
 		Reservation reservation = findReservation(reservationId);
 		ReservationSlot slot = findSlotForUpdate(reservation.getReservationSlotId());
-		/*
-			if (!userInfo.getRole.equals("ADMIN") && reservation.getUserId() != userInfo) {
-			throw new ReservationPermissionDenied("접근 권한이 없습니다");
-		 */
 
+		checkAuthority(userInfo, reservation);
 		slot.increase();
 
-		reservation.delete(1L);    //임시
+		reservation.delete(userInfo.getUserId());
 	}
 
 	private ReservationSlot checkReservationSlot(UUID hospitalId, LocalDate reservationDate, Integer reservationTime) {
@@ -134,6 +135,12 @@ public class ReservationService {
 		} catch (Exception e) {
 			return reservationSlotRepository.findByReservationInfo(hospitalId, reservationDate, reservationTime)
 				.orElseThrow(() -> new IllegalArgumentException("오류"));
+		}
+	}
+
+	private void checkAuthority(UserDetails userInfo, Reservation reservation) {
+		if (!userInfo.getRole().equals("ROLE_ADMIN") && !reservation.getUserId().equals(userInfo.getUserId())) {
+			throw new ReservationPermissionDenied("접근 권한이 없습니다");
 		}
 	}
 

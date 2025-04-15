@@ -31,7 +31,7 @@ public class ReservationSlotRepositoryImpl implements ReservationSlotRepository 
 
 	@Override
 	public Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId) {
-		return reservationSlotJpaRepository.findByIdForUpdate(reservationSlotId);
+		return reservationSlotJpaRepository.findById(reservationSlotId);
 	}
 
 }

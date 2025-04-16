@@ -16,35 +16,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import bookinghospital.common_module.userInfo.UserDetails;
+import bookinghospital.common_module.userInfo.UserInfo;
 import bookinghostpial.reservation_service.application.service.ReservationService;
 import bookinghostpial.reservation_service.presentation.dto.request.CreateReservationRequest;
 import bookinghostpial.reservation_service.presentation.dto.request.UpdateReservationRequest;
 import bookinghostpial.reservation_service.presentation.dto.response.ReservationDetailsResponse;
 import bookinghostpial.reservation_service.presentation.dto.response.ReservationResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
 	private final ReservationService reservationService;
 
 	@PostMapping()
-	public ResponseEntity<Void> createReservation(@RequestBody CreateReservationRequest request) {
+	public ResponseEntity<Void> createReservation(@RequestBody CreateReservationRequest request,
+		@UserInfo UserDetails userInfo) {
 
-		//service로 request를 넘길것인가? or dto를 만들어서 보낼것인가?
 		reservationService.createReservation(request.getHospitalId(), request.getReservationDate(),
-			request.getReservationTime());
+			request.getReservationTime(), userInfo);
 
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@GetMapping()
 	public ResponseEntity<Page<ReservationResponse>> getAllReservations(
-		//@UserInfo userInfo
+		@UserInfo UserDetails userInfo,
 		@PageableDefault Pageable pageable) {
-		Page<ReservationResponse> reservationList = reservationService.getReservationList(pageable);
+		Page<ReservationResponse> reservationList = reservationService.getReservationList(pageable, userInfo);
 		return ResponseEntity.ok(reservationList);
 	}
 
@@ -58,16 +62,18 @@ public class ReservationController {
 
 	@PatchMapping("/{reservation_id}")
 	public ResponseEntity<Void> updateReservation(@PathVariable("reservation_id") UUID reservationId,
-		@RequestBody UpdateReservationRequest request) {
+		@RequestBody UpdateReservationRequest request, @UserInfo UserDetails userInfo) {
 
-		reservationService.updateReservation(reservationId, request.getReservationDate(), request.getReservationTime());
+		reservationService.updateReservation(reservationId, request.getReservationDate(), request.getReservationTime(),
+			userInfo);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	@DeleteMapping("/{reservation_id}")
-	public ResponseEntity<Void> deleteReservation(@PathVariable("reservation_id") UUID reservationId) {
+	public ResponseEntity<Void> deleteReservation(@PathVariable("reservation_id") UUID reservationId,
+		UserDetails userInfo) {
 
-		reservationService.deleteReservation(reservationId);
+		reservationService.deleteReservation(reservationId, userInfo);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 

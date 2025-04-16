@@ -29,4 +29,9 @@ public class ReservationSlotRepositoryImpl implements ReservationSlotRepository 
 			reservationDate, reservationTime);
 	}
 
+	@Override
+	public Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId) {
+		return reservationSlotJpaRepository.findById(reservationSlotId);
+	}
+
 }

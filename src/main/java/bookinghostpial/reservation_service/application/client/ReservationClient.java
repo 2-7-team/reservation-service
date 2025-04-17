@@ -1,10 +1,10 @@
 package bookinghostpial.reservation_service.application.client;
 
-import java.util.UUID;
+import java.util.List;
 
-import bookinghostpial.reservation_service.application.dto.HospitalInfoResponse;
+import bookinghostpial.reservation_service.application.dto.HospitalWithSchedulesResponse;
 
 public interface ReservationClient {
 
-	HospitalInfoResponse getHospital(UUID hospitalId);
+	List<HospitalWithSchedulesResponse> getHospital();
 }

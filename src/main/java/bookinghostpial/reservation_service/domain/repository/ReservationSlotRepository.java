@@ -1,6 +1,7 @@
 package bookinghostpial.reservation_service.domain.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public interface ReservationSlotRepository {
 		Integer reservationTime);
 
 	Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId);
+
+	List<ReservationSlot> saveAll(List<ReservationSlot> reservationSlots);
 }

@@ -41,4 +41,10 @@ public class ReservationExceptionHandler extends GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
+
+	@ExceptionHandler(CannotUpdateSeatException.class)
+	protected ResponseEntity<String> handleException(CannotUpdateSeatException e) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	}
 }

@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import bookinghostpial.reservation_service.domain.exception.CannotUpdateSeatException;
 import bookinghostpial.reservation_service.domain.exception.NotExistReservationException;
 import bookinghostpial.reservation_service.domain.exception.NotExistReservationSlotException;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationSlotService {
 
 	private final ReservationSlotRepository reservationSlotRepository;
@@ -22,6 +25,7 @@ public class ReservationSlotService {
 			.orElseThrow(() -> new NotExistReservationException("예약 정보가 존재하지 않습니다"));   //에러코드로 관리
 	}
 
+	@Transactional
 	public ReservationSlot decreaseReservationSlot(UUID hospitalId, LocalDate reservationDate,
 		Integer reservationTime) {
 
@@ -31,6 +35,7 @@ public class ReservationSlotService {
 		return reservationSlot;
 	}
 
+	@Transactional
 	public ReservationSlot increaseReservationSlot(UUID hospitalId, LocalDate reservationDate,
 		Integer reservationTime) {
 
@@ -48,4 +53,13 @@ public class ReservationSlotService {
 
 	}
 
+	@Transactional
+	public void updateLeftSeat(UUID hospitalId, Integer reservationTime, LocalDate reservationDate,
+		Integer updateLeftSeat) {
+		ReservationSlot reservationSlot = findReservationSlot(hospitalId, reservationDate, reservationTime);
+		if (reservationSlot.getLeftSeat() < updateLeftSeat) {
+			throw new CannotUpdateSeatException("현재 예약된 수보다 적게는 수정할 수 없습니다.");
+		}
+		reservationSlot.changeSeat(updateLeftSeat);
+	}
 }

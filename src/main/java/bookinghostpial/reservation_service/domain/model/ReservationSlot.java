@@ -38,7 +38,7 @@ public class ReservationSlot {
 	private UUID hospitalId;
 
 	@Column(nullable = false)
-	private Integer left_seat;
+	private Integer leftSeat;
 
 	@Column(nullable = false)
 	private LocalDate reservationDate;
@@ -49,20 +49,24 @@ public class ReservationSlot {
 	@Builder(builderMethodName = "createReservationSlotBuilder")
 	public ReservationSlot(UUID hospitalId, Integer leftSeat, LocalDate reservationDate, Integer reservationTime) {
 		this.hospitalId = hospitalId;
-		this.left_seat = leftSeat;
+		this.leftSeat = leftSeat;
 		this.reservationDate = reservationDate;
 		this.reservationTime = reservationTime;
 	}
 
 	public void decrease() {
-		if (left_seat > 0) {
-			left_seat--;
+		if (leftSeat > 0) {
+			leftSeat--;
 		} else {
 			throw new NoLeftSeatException("예약 가능한 좌석이 없습니다.");
 		}
 	}
 
 	public void increase() {
-		left_seat++;
+		leftSeat++;
+	}
+
+	public void changeSeat(Integer updateLeftSeat) {
+		this.leftSeat = updateLeftSeat;
 	}
 }

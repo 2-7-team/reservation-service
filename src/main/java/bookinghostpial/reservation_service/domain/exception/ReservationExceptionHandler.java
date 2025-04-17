@@ -35,4 +35,10 @@ public class ReservationExceptionHandler extends GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
+
+	@ExceptionHandler(NotExistReservationSlotException.class)
+	protected ResponseEntity<String> handleException(NotExistReservationSlotException e) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	}
 }

@@ -35,7 +35,7 @@ ext {
 }
 
 dependencies {
-    implementation 'bookinghospital:common-module:0.2.3-SNAPSHOT'
+    implementation 'bookinghospital:common-module:0.2.6-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bookinghospital.common_module.userInfo.UserDetails;
 import bookinghospital.common_module.userInfo.UserInfo;
+import bookinghostpial.reservation_service.application.facade.ReservationFacade;
 import bookinghostpial.reservation_service.application.service.ReservationService;
 import bookinghostpial.reservation_service.presentation.dto.request.CreateReservationRequest;
 import bookinghostpial.reservation_service.presentation.dto.request.UpdateReservationRequest;
@@ -33,12 +34,13 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservationController {
 
 	private final ReservationService reservationService;
+	private final ReservationFacade reservationFacade;
 
 	@PostMapping()
 	public ResponseEntity<Void> createReservation(@RequestBody CreateReservationRequest request,
 		@UserInfo UserDetails userInfo) {
 
-		reservationService.createReservation(request.getHospitalId(), request.getReservationDate(),
+		reservationFacade.reserve(request.getHospitalId(), request.getReservationDate(),
 			request.getReservationTime(), userInfo);
 
 		return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -64,7 +66,7 @@ public class ReservationController {
 	public ResponseEntity<Void> updateReservation(@PathVariable("reservation_id") UUID reservationId,
 		@RequestBody UpdateReservationRequest request, @UserInfo UserDetails userInfo) {
 
-		reservationService.updateReservation(reservationId, request.getReservationDate(), request.getReservationTime(),
+		reservationFacade.updateReserve(reservationId, request.getReservationDate(), request.getReservationTime(),
 			userInfo);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
@@ -73,7 +75,7 @@ public class ReservationController {
 	public ResponseEntity<Void> deleteReservation(@PathVariable("reservation_id") UUID reservationId,
 		UserDetails userInfo) {
 
-		reservationService.deleteReservation(reservationId, userInfo);
+		reservationFacade.cancelReservation(reservationId, userInfo);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 

@@ -36,10 +36,9 @@ public class ReservationSlotService {
 	}
 
 	@Transactional
-	public ReservationSlot increaseReservationSlot(UUID hospitalId, LocalDate reservationDate,
-		Integer reservationTime) {
+	public ReservationSlot increaseReservationSlot(UUID reservationSlotId) {
 
-		ReservationSlot reservationSlot = findReservationSlot(hospitalId, reservationDate, reservationTime);
+		ReservationSlot reservationSlot = findSlotForUpdate(reservationSlotId);
 		reservationSlot.increase();
 
 		return reservationSlot;
@@ -54,9 +53,13 @@ public class ReservationSlotService {
 	}
 
 	@Transactional
-	public void updateLeftSeat(UUID hospitalId, Integer reservationTime, LocalDate reservationDate,
+	public void updateLeftSeat(UUID hospitalId, Integer reservationTime,
 		Integer updateLeftSeat) {
-		ReservationSlot reservationSlot = findReservationSlot(hospitalId, reservationDate, reservationTime);
+
+		LocalDate reservationDate = LocalDate.now();    // 변경 시점의 날짜 ( 오늘 ) ex) 오늘 오후 3시면은 이미 생성된 예약테이블 좌석 변경 시도. 오전 12시 이후 오전 6시 이전이면 테이블 존재 안하므로 error
+
+		ReservationSlot reservationSlot = findReservationSlot(hospitalId, reservationDate,
+			reservationTime);    //다른 메소드로 변경할 수 있을 듯
 		if (reservationSlot.getLeftSeat() < updateLeftSeat) {
 			throw new CannotUpdateSeatException("현재 예약된 수보다 적게는 수정할 수 없습니다.");
 		}

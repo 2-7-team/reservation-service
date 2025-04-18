@@ -25,7 +25,7 @@ public class ReservationInternalController {
 		@RequestBody UpdateLeftSeatRequest leftSeatRequest) {
 
 		reservationSlotService.updateLeftSeat(hospitalId, leftSeatRequest.getReservationTime(),
-			leftSeatRequest.getReservationDate(), leftSeatRequest.getUpdateLeftSeat());
+			leftSeatRequest.getUpdateLeftSeat());
 		return ResponseEntity.ok().body("성공적으로 수정되었습니다");
 	}
 }

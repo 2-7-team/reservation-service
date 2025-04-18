@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import bookinghospital.common_module.userInfo.UserDetails;
 import bookinghostpial.reservation_service.application.service.ReservationService;
 import bookinghostpial.reservation_service.application.service.ReservationSlotService;
+import bookinghostpial.reservation_service.domain.model.Reservation;
 import bookinghostpial.reservation_service.domain.model.ReservationSlot;
 import lombok.RequiredArgsConstructor;
 
@@ -23,9 +24,11 @@ public class ReservationFacade {
 	public void reserve(UUID hospitalId, LocalDate reservationDate, Integer reservationTime,
 		UserDetails userInfo) {
 
+		//예약 좌석 감소
 		ReservationSlot reservationSlot = reservationSlotService.decreaseReservationSlot(hospitalId, reservationDate,
 			reservationTime);
 
+		//예약 생성
 		reservationService.createReservation(reservationSlot.getId(), reservationDate, reservationTime,
 			userInfo);
 
@@ -35,16 +38,25 @@ public class ReservationFacade {
 	public void updateReserve(UUID reservationId, LocalDate newReservationDate, Integer newReservationTime,
 		UserDetails userInfo) {
 
-		ReservationSlot slot = reservationSlotService.findSlotForUpdate(reservationId);
+		/*
+		 *
+		 * 그냥 reservation 찾은거로 slot 줄이고 새로 찾아서 업데이트 하면 되지 않나..... 근데 생성시에 그게 안됨...
+		 * */
 
-		reservationSlotService.increaseReservationSlot(slot.getHospitalId(), slot.getReservationDate(),
-			slot.getReservationTime());
+		//기존 예약 찾기
+		Reservation reservation = reservationService.findReservation(reservationId);
 
+		//기존 예약좌석 증가
+		ReservationSlot slot = reservationSlotService.increaseReservationSlot(
+			reservation.getReservationSlotId());
+
+		//새 예약좌석 가능여부 확인 및 감소
 		ReservationSlot newSlot = reservationSlotService.decreaseReservationSlot(slot.getHospitalId(),
 			newReservationDate,
 			newReservationTime);
 
-		reservationService.updateReservation(slot.getId(), newSlot.getId(), reservationId, newReservationDate,
+		//기존 예약 업데이트								//도메인을 넘긴다? reservationService에 reservation은 괜찮지 않을까
+		reservationService.updateReservation(newSlot.getId(), reservation, newReservationDate,
 			newReservationTime, userInfo);
 
 	}
@@ -52,12 +64,14 @@ public class ReservationFacade {
 	@Transactional
 	public void cancelReservation(UUID reservationId, UserDetails userInfo) {
 
-		ReservationSlot slot = reservationSlotService.findSlotForUpdate(reservationId);
+		//기존 예약 찾기
+		Reservation reservation = reservationService.findReservation(reservationId);
 
-		reservationSlotService.increaseReservationSlot(slot.getHospitalId(), slot.getReservationDate(),
-			slot.getReservationTime());
+		//기존 예약좌석 증가
+		reservationSlotService.increaseReservationSlot(reservation.getReservationSlotId());
 
-		reservationService.deleteReservation(slot.getId(), reservationId, userInfo);
+		//예약 취소 ( 고도화 시 예약 시간 전에만 취소 가능 )
+		reservationService.deleteReservation(reservation, userInfo);
 	}
 
 }

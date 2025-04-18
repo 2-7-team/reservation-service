@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import bookinghospital.common_module.userInfo.UserDetails;
+import bookinghostpial.reservation_service.application.event.ReservationCreateAlertEvent;
 import bookinghostpial.reservation_service.domain.exception.NotExistReservationException;
 import bookinghostpial.reservation_service.domain.exception.ReservationAlreadyDeletedException;
 import bookinghostpial.reservation_service.domain.exception.ReservationPermissionDenied;
@@ -42,6 +43,10 @@ public class ReservationService {
 
 		reservationRepository.save(reservation);
 
+		eventPublisher.publishEvent(
+			new ReservationCreateAlertEvent(reservation.getId(), userInfo.getUserId(), reservationDate,
+				//나중에 dto 전체 builder or 정적팩토리로 바꾸겠습니다...
+				reservationTime));
 	}
 
 	public Page<ReservationResponse> getReservationList(
@@ -59,6 +64,7 @@ public class ReservationService {
 				.reservation(reservation).build());
 	}
 
+	//Response만 만들고 있는데 컨트롤러에 위임이 낫지 않나
 	public ReservationDetailsResponse getReservationDetails(UUID reservationId) {
 
 		Reservation reservation = findReservation(reservationId);
@@ -70,10 +76,9 @@ public class ReservationService {
 	}
 
 	@Transactional
-	public void updateReservation(UUID slotId, UUID newSlotId, UUID reservationId, LocalDate reservationDate,
+	public void updateReservation(UUID newSlotId, Reservation reservation, LocalDate reservationDate,
 		Integer reservationTime,
 		UserDetails userInfo) {
-		Reservation reservation = findReservation(reservationId);
 
 		checkAuthority(userInfo, reservation);
 
@@ -81,8 +86,8 @@ public class ReservationService {
 	}
 
 	@Transactional
-	public void deleteReservation(UUID slotId, UUID reservationId, UserDetails userInfo) {
-		Reservation reservation = findReservation(reservationId);
+	public void deleteReservation(Reservation reservation, UserDetails userInfo) {
+
 		checkAuthority(userInfo, reservation);
 
 		reservation.delete(userInfo.getUserId());

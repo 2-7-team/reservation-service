@@ -1,6 +1,7 @@
 package bookinghostpial.reservation_service.infrastructure.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +33,11 @@ public class ReservationSlotRepositoryImpl implements ReservationSlotRepository 
 	@Override
 	public Optional<ReservationSlot> findByIdForUpdate(UUID reservationSlotId) {
 		return reservationSlotJpaRepository.findById(reservationSlotId);
+	}
+
+	@Override
+	public List<ReservationSlot> saveAll(List<ReservationSlot> reservationSlots) {
+		return reservationSlotJpaRepository.saveAll(reservationSlots);
 	}
 
 }

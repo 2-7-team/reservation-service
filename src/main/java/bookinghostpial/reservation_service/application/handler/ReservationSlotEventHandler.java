@@ -1,6 +1,7 @@
 package bookinghostpial.reservation_service.application.handler;
 
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -14,7 +15,7 @@ public class ReservationSlotEventHandler {
 
 	private final KafkaTemplate<String, ReservationCreateAlertEvent> kafkaTemplate;
 
-	//@Async 비동기
+	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void sendMessage(ReservationCreateAlertEvent event) {
 

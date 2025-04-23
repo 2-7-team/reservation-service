@@ -37,7 +37,7 @@ public class DistributedLockAop {
 			boolean available = rLock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(),
 				distributedLock.timeUnit());
 			if (!available) {
-				return false;
+				throw new InterruptedException();
 			}
 
 			//	log.info("락 획득 - key: {}, method: {}, 시간: {}ms",

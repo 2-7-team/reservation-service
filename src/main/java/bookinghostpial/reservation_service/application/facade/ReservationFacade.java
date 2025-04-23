@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import bookinghospital.common_module.userInfo.UserDetails;
+import bookinghostpial.reservation_service.application.lock.DistributedLock;
 import bookinghostpial.reservation_service.application.service.ReservationService;
 import bookinghostpial.reservation_service.application.service.ReservationSlotService;
 import bookinghostpial.reservation_service.domain.model.Reservation;
@@ -15,17 +16,17 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ReservationFacade {
 	private final ReservationSlotService reservationSlotService;
 	private final ReservationService reservationService;
 
-	@Transactional
+	@DistributedLock(key = "#hospitalId + '-' + #reservationDate + '-' + #reservationTime")
 	public void reserve(UUID hospitalId, LocalDate reservationDate, Integer reservationTime,
 		UserDetails userInfo) {
 
 		//예약 좌석 감소
-		ReservationSlot reservationSlot = reservationSlotService.decreaseReservationSlot(hospitalId, reservationDate,
+		ReservationSlot reservationSlot = reservationSlotService.decreaseReservationSlot(hospitalId,
+			reservationDate,
 			reservationTime);
 
 		//예약 생성
@@ -37,11 +38,6 @@ public class ReservationFacade {
 	@Transactional
 	public void updateReserve(UUID reservationId, LocalDate newReservationDate, Integer newReservationTime,
 		UserDetails userInfo) {
-
-		/*
-		 *
-		 * 그냥 reservation 찾은거로 slot 줄이고 새로 찾아서 업데이트 하면 되지 않나..... 근데 생성시에 그게 안됨...
-		 * */
 
 		//기존 예약 찾기
 		Reservation reservation = reservationService.findReservation(reservationId);

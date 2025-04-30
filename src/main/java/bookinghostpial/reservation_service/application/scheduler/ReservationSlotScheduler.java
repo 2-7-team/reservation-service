@@ -24,7 +24,6 @@ public class ReservationSlotScheduler {
 	private final ReservationSlotRepository reservationSlotRepository;
 	private List<List<ReservationSlot>> failedHospitalList = new ArrayList<>();
 
-	//추후 멀티 서버 환경이면 락 걸어야함
 	@Scheduled(cron = "0 0 6 * * *")
 	public void reservationSlotScheduler() {
 		List<HospitalWithSchedulesResponse> hospitalList = reservationClient.getHospital();
